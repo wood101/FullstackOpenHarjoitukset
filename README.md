@@ -1,3 +1,4 @@
 # FullstackOpenHarjoitukset
 
-## [Viikko 0](https://github.com/wood101/FullstackOpenHarjoitukset/tree/master/Viikko%200)
+## [Osa 0](https://github.com/wood101/FullstackOpenHarjoitukset/tree/master/Osa%200)
+## [Osa 1](https://github.com/wood101/FullstackOpenHarjoitukset/tree/master/Osa 1)

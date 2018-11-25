@@ -47,7 +47,7 @@ class App extends React.Component {
   }
 
   showNumber = (person) => {
-    if(person.name.toLowerCase() !== this.state.filter.toLowerCase()) {
+    if(person.name.toLowerCase().includes(this.state.filter.toLowerCase())) {
       return (
       <div key={person.name}>
         <p>{person.name} {person.number}  <button onClick={() => this.handleClickRemoveButton(person)}>poista</button> </p>

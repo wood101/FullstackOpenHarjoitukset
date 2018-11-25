@@ -65,6 +65,7 @@ class Form extends Component {
         })
 
     }
+    
     updatePerson = (person) => {
         person.number = this.state.newNumber
 

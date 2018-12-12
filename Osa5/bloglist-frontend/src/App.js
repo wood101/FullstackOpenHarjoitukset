@@ -1,8 +1,12 @@
 import React from 'react'
 import Blog from './components/Blog'
 import Form from './components/Form'
+import LoginForm from './components/LoginForm'
+import Togglable from './components/Togglable'
+import Notification from './components/Notification'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import './index.css'
 
 class App extends React.Component {
   constructor(props) {
@@ -10,9 +14,9 @@ class App extends React.Component {
     this.state = {
       blogs: [],
       newBlog: '',
-      showAll: true,
       error: null,
       success: null,
+      messageOpen: true,
       username: '',
       password: '',
       user: null      
@@ -24,7 +28,7 @@ class App extends React.Component {
       this.setState({ blogs })
     )
 
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
       const user = JSON.parse(loggedUserJSON)
       this.setState({user})
@@ -32,10 +36,19 @@ class App extends React.Component {
     }
   }
 
+  logout = () => {
+    this.setState({
+      user: null,
+    })
+    this.changeSuccessMessage('User logged out')
+    window.localStorage.removeItem('loggedBlogAppUser')
+    blogService.setToken(null)
+  }
+
   updateBlogs = (blogs, success, error) => {
     this.setState({blogs})
-    this.setState({success})
-    this.setState({error})
+    this.changeSuccessMessage(success)
+    this.changeErrorMessage(error)
   }
 
   handleBlogChange = (event) => {
@@ -46,9 +59,44 @@ class App extends React.Component {
     this.setState({ [event.target.name]: event.target.value })
   }
   
+  changeErrorMessage = (error) => {
+    this.setState({ error })
+    setTimeout(() => {
+      this.setState({ error: null })
+    }, 3000)
+  }
 
-  toggleVisible = () => {
-    this.setState({ showAll: !this.state.showAll })
+  changeSuccessMessage = (success) => {
+    this.setState({ success })
+    setTimeout(() => {
+      this.setState({ success: null })
+    }, 3000)
+
+  }  
+
+  removeBlog = async (blog) => {
+    if(window.confirm("delete '" + blog.title + "' by " + blog.author + "?")) {
+      try{
+        const i = this.state.blogs.map(e => e.id).indexOf(blog.id);
+        await blogService.remove(blog.id)
+        var array = this.state.blogs
+        array.splice(i, 1)
+        this.setState({blogs: array})
+        this.changeSuccessMessage('Removed blog ' + blog.title)
+      } catch(exception) {
+        this.changeErrorMessage('Something went wrong with removing post')
+      }
+    }
+  }
+
+  addALike = async (blog) => {
+    try{
+      blog.likes = blog.likes + 1
+      await blogService.update(blog.id, blog)
+      this.changeSuccessMessage('Liked ' + blog.title)
+    } catch(exception) {
+      this.changeErrorMessage('Something went wrong with liking a post')
+    }
   }
 
   login = async (event) => {
@@ -59,64 +107,44 @@ class App extends React.Component {
         password: this.state.password
       })
 
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
+      window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
       blogService.setToken(user.token)
-      this.setState({ username: '', password: '', user})
-    } catch(exception) {
-      this.setState({
-        error: 'käyttäjätunnus tai salasana virheellinen',
+      this.setState({ 
+        username: '',
+        password: '',
+        user,
       })
-      setTimeout(() => {
-        this.setState({ error: null })
-      }, 5000)
+      this.changeSuccessMessage('User ' + this.state.user.name + ' logged in')
+    } catch(exception) {
+      this.changeErrorMessage('Wrong username or password')
     }
   }
 
-
   render() {
-    const loginForm = () => (
-      <div>
-        <h2>Kirjaudu</h2>
-    
-        <form onSubmit={this.login}>
-          <div>
-            käyttäjätunnus
-            <input
-              type="text"
-              name="username"
-              value={this.state.username}
-              onChange={this.handleLoginFieldChange}
-            />
-          </div>
-          <div>
-            salasana
-            <input
-              type="password"
-              name="password"
-              value={this.state.password}
-              onChange={this.handleLoginFieldChange}
-            />
-          </div>
-          <button type="submit">kirjaudu</button>
-        </form>
-      </div>
-    )
 
     const showBlogs = () => (
       <div>
-        <h2>blogs</h2>
-        {this.state.blogs.map(blog => <Blog key={blog._id} blog={blog}/>)} 
+        <h2>Blogs</h2>
+        {this.state.blogs.sort(function(a, b) {
+          return b.likes - a.likes
+        }).map(blog => <Blog key={blog.id} blog={blog} addALike = {this.addALike} removeBlog = {this.removeBlog} user = {this.state.user}/>)} 
       </div>
     )
 
     return (
       <div>
-
+        <Notification errorMessage={this.state.error} successMessage={this.state.success}/>
         {this.state.user === null ?
-          loginForm() :
           <div>
-            <p>{this.state.user.name} logged in</p>
-            <Form newSubmission = {this.updateBlogs} blogs = {this.state.blogs} />
+            <Togglable buttonLabel="log in">
+              <LoginForm handleLoginFieldChange={this.handleLoginFieldChange} login={this.login} username={this.state.username} password={this.state.password}/>
+            </Togglable>
+          </div> :
+          <div>
+            <p>{this.state.user.name} logged in <button onClick={() => this.logout()}>logout</button></p>
+            <Togglable buttonLabel="new blog">
+              <Form newSubmission = {this.updateBlogs} blogs = {this.state.blogs} />
+            </Togglable>
             {showBlogs()}
           </div>
         }

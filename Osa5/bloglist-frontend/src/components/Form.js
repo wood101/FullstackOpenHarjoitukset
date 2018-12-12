@@ -68,13 +68,17 @@ class Form extends Component {
         
         blogService
         .create(blog)
-        .then(newBlog => {
+        .then(blog => {
           this.setState({
-            Blogs: this.state.Blogs.concat(newBlog),
-            newBlog: ''
+            newTitle: '',
+            newAuthor: '',
+            newUrl: '',
+            newLikes: ''
           })
           const blogs = this.props.blogs.concat(blog)
-          this.props.newSubmission(blogs, 'Lisättiin ' + blog.title + '.', null)
+          this.props.newSubmission(blogs, 'Added a new blog ' + blog.title, null)
+        }).catch(error => {
+          this.props.newSubmission(this.props.blogs, null, 'Title or author cannot be empty')
         })
     }
 }

@@ -1,0 +1,10 @@
+POST http://localhost:3003/api/blogs
+content-type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6InVzZXIyIiwiaWQiOiI1YzAzZDdiYzk2ZTlhYTFlNDQ0ODQwYzIiLCJpYXQiOjE1NDM3NjMzNTZ9.8aYfXCn1pZsF5nq-8hmv0z770bY77M5FK-yjI-sP_6c
+
+{
+  "title": "Kakku",
+  "author": "Mestarikokki",
+  "url": "www.hyvaresepti.fi/kakku",
+  "likes": 8
+}

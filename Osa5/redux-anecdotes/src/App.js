@@ -1,26 +1,43 @@
 import React from 'react';
-
+import actionFor from './actionCreators'
 
 class App extends React.Component {
+
+  addAnecdote = (event) => {
+    event.preventDefault()
+    this.props.store.dispatch(
+      actionFor.anecdoteCreation(event.target.anecdote.value)
+    )
+    event.target.anecdote.value = ''
+  }
+
+  voteAnecdote = (id) => (e) => {
+    this.props.store.dispatch(
+      actionFor.voting(id)
+    )
+  }
+
   render() {
     const anecdotes = this.props.store.getState()
     return (
       <div>
         <h2>Anecdotes</h2>
-        {anecdotes.map(anecdote=>
+        {anecdotes.sort(function(a, b) {
+          return b.votes - a.votes
+        }).map(anecdote=>
           <div key={anecdote.id}>
             <div>
               {anecdote.content} 
             </div>
             <div>
               has {anecdote.votes}
-              <button>vote</button>
+              <button onClick={this.voteAnecdote(anecdote.id)}>vote</button>
             </div>
           </div>
         )}
         <h2>create new</h2>
-        <form>
-          <div><input /></div>
+        <form onSubmit={this.addAnecdote}>
+          <div><input name="anecdote" /></div>
           <button>create</button> 
         </form>
       </div>

@@ -2,12 +2,11 @@
 /* global handleChange */
 import React from 'react'
 import { filterChange } from './../reducers/filterReducer'
+import { connect } from 'react-redux'
 
 class Filter extends React.Component {
     handleChange = (e) => {
-      this.props.store.dispatch(
-        filterChange(e.target.value)
-      )
+      this.props.filterChange(e.target.value)
     }
 
     render() {
@@ -22,4 +21,7 @@ class Filter extends React.Component {
       )
     }
 }
-export default Filter
+export default connect(
+  null,
+  { filterChange }
+)(Filter)

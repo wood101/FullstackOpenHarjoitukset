@@ -19,30 +19,36 @@ const asObject = (anecdote) => {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 const initialState = anecdotesAtStart.map(asObject)
 
-const anecdoteReducer = (state = initialState, action) => {
+const anecdoteReducer = (state = [], action) => {
   switch(action.type) {
   case ('VOTE'):
     var old = state.filter(a => a.id !== action.id)
     var voted = state.find(a => a.id === action.id)
 
-    return [...old, { ...voted, votes: voted.votes + 1 } ]
+    return [...old, { ...voted, votes: voted.votes } ]
   case ('CREATE'):
     return [...state, action.data]
+  case ('INIT_ANECDOTES'):
+    return action.data
   default:
     return state
   }
 }
 
-export const anecdoteCreation = (content) => {
+export const anecdoteInitialization = (data) => {
+  return {
+    type: 'INIT_ANECDOTES',
+    data
+  }
+}
+
+export const anecdoteCreation = (data) => {
   return {
     type: 'CREATE',
-    data: {
-      content,
-      id: getId(),
-      votes: 0
-    }
+    data
   }
 }
 
